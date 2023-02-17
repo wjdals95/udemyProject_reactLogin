@@ -20,34 +20,38 @@ const AuthForm = () => {
     const enteredPassword = passwordInputRef.current.value;
 
     setIsLoading(true);
-
+    let url;
     if (isLogin) {
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyD6tPawQ5X_L0s3YjiAuNro6wyTgqOVdpg";
     } else {
-      fetch(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=AIzaSyD6tPawQ5X_L0s3YjiAuNro6wyTgqOVdpg",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            email: enteredEmail,
-            password: enteredPassword,
-            returnSecureToken: true,
-          }),
-          header: {
-            "Content-type": "apllication/json",
-          },
-        }
-      ).then((res) => {
-        setIsLoading(false);
-        if (res.ok) {
-        } else {
-          return res.json().then((data) => {
-            let errorMessage = "Authentication failed!";
-            alert(errorMessage);
-          });
-        }
-      });
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyD6tPawQ5X_L0s3YjiAuNro6wyTgqOVdpg";
     }
-    
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true,
+      }),
+      header: {
+        "Content-type": "apllication/json",
+      },
+    }).then((res) => {
+      setIsLoading(false);
+      if (res.ok) {
+        return res.json();
+      } else {
+        return res.json().then((data) => {
+          let errorMessage = "Authentication failed!";
+          
+          throw new Error(errorMessage);
+        });
+      }
+    }).then((data)=>{}).catch((err) => {
+      alert(err.message);
+    });
   };
   return (
     <section className={classes.auth}>
@@ -67,7 +71,9 @@ const AuthForm = () => {
           />
         </div>
         <div className={classes.actions}>
-          {!isLoading && <button>{isLogin ? "Login" : "Create Account"}</button>}
+          {!isLoading && (
+            <button>{isLogin ? "Login" : "Create Account"}</button>
+          )}
           {isLoading && <p>Sending request...</p>}
           <button
             type="button"
